@@ -53,7 +53,7 @@ def check_user(request):
         return user
     return None
 
-
+'''
 # Пути, которые доступны всем
 PUBLIC_PATHS = ['/', '/login', '/api/add_order']
 
@@ -76,6 +76,7 @@ def restrict_access():
 
     if not is_local:
         abort(403)
+'''
 
 
 @app.route('/')
