@@ -1,0 +1,406 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>Бланк заказа для выставки</title>
+{% endblock %}
+{% block body %}
+<style>
+    /* Стиль для активной строки */
+    .table tbody tr.active {
+        background-color: #afafaf !important;
+        color: white !important;
+    }
+
+    .table tbody tr {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    .table tbody tr.active td {
+        border-color: #afafaf !important;
+        background-color: #afafaf !important;
+        color: white !important;
+    }
+
+    /* Стиль для кнопки удаления */
+    .delete-btn-container {
+        position: sticky;
+        left: 0;
+        bottom: 20px;
+        padding: 10px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        z-index: 100;
+    }
+
+    #deleteSelectedBtn {
+        transition: all 0.3s ease;
+    }
+
+    #deleteSelectedBtn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+<div class="container mt-4 p-4 bg-white shadow rounded" id="printable-area">
+    <div class="row mb-3">
+            <div class="col-md-4">
+                <img class="w-25" src="static/logo.svg" alt="Логотип" style="max-width: 200px;">
+            </div>
+            <div class="col-md-4">
+                <h3 class="text-center mb-4">Бланк заказа для выставки</h3>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex justify-content-end align-items-center gap-3">
+                    <h5 class="mb-0" id="manager" required>{{ username }}</h5>
+                    <button type="button" class="btn btn-info text-white" onclick="Exit()">Выйти</button>
+                </div>
+            </div>
+    </div>
+    <form id="orderForm">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label class="form-label"><strong>Клиент:</strong></label>
+                <input type="text" class="form-control" id="client" name="client" list="clients" />
+                <datalist id="clients">
+                    {% for el in clients %}
+                        <option>{{el}}</option>
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label"><strong>Дата:</strong></label>
+                <input type="date" class="form-control" id="date" required />
+            </div>
+        </div>
+        <h5 class="mt-4">Заказ</h5>
+        <div class="container-fluid">
+            <div class="table-responsive" style="overflow-x: auto;">
+                <table class="table table-bordered table-sm" style="table-layout: fixed; min-width: 100%;">
+                    <thead class="table-dark">
+                        <tr>
+                            <th style="width: 150px;">Артикул</th>
+                            <th style="width: 60px;">б.р.</th>
+                            <th style="width: 60px;">15</th>
+                            <th style="width: 60px;">15.5</th>
+                            <th style="width: 60px;">16</th>
+                            <th style="width: 60px;">16.5</th>
+                            <th style="width: 60px;">17</th>
+                            <th style="width: 60px;">17.5</th>
+                            <th style="width: 60px;">18.5</th>
+                            <th style="width: 60px;">19</th>
+                            <th style="width: 60px;">19.5</th>
+                            <th style="width: 60px;">20.0</th>
+                            <th style="width: 60px;">20.5</th>
+                            <th style="width: 60px;">21</th>
+                            <th style="width: 60px;">21.5</th>
+                            <th style="width: 60px;">22</th>
+                            <th style="width: 60px;">22.5</th>
+                            <th style="width: 60px;">23</th>
+                            <th style="width: 60px;">38</th>
+                            <th style="width: 60px;">40</th>
+                            <th style="width: 60px;">45</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                        <datalist id="articuls">
+                            {% for el in articuls %}
+                                <option>{{el}}</option>
+                            {% endfor %}
+                        </datalist>
+                        <!-- Динамически добавляем строки -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        <button type="button" class="btn btn-primary" onclick="addRow()">+ Добавить строку</button>
+        <button id="deleteSelectedBtn" class="btn btn-danger" disabled>
+            <i class="bi bi-trash"></i> Удалить строку
+        </button>
+        <div class="mt-4">
+            <label class="form-label"><strong>Комментарий к заказу:</strong></label>
+            <textarea class="form-control" id="orderComment" rows="2"></textarea>
+        </div>
+    </form>
+    <div class="mt-4 text-center">
+        <button class="btn btn-success me-2" onclick="saveToPDF()">Сохранить в PDF</button>
+        <button class="btn btn-info text-white" onclick="sendToAPI()">Отправить заказ</button>
+    </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+<script>
+    // Инициализация jsPDF
+    const { jsPDF } = window.jspdf;
+
+    // Сохранить как PDF
+    function saveToPDF() {
+        // Создаем новый PDF документ
+        const doc = new jsPDF();
+
+        doc.addFont('static/DejaVuSans.ttf', 'DejaVuSans', 'normal');
+
+        doc.setFont('DejaVuSans');
+
+        // Получаем данные из формы
+        const client = document.getElementById('client').value || '-';
+        const date = document.getElementById('date').value || '-';
+        const comment = document.getElementById('orderComment').value || '-';
+
+        // Добавляем заголовок
+        doc.setFontSize(15);
+        doc.text('ЗАКАЗ', 105, 15, { align: 'center' });
+
+        // Добавляем информацию о клиенте и дате
+        doc.setFontSize(10);
+        doc.text(`Клиент: ${client}`, 14, 25);
+        doc.text(`Дата: ${date}`, 14, 32);
+
+        // Подготавливаем данные для таблицы
+        const tableRows = [];
+        const tableBody = document.getElementById('orderTableBody');
+        const rows = tableBody.querySelectorAll('tr');
+
+        // Заголовки колонок
+        const headers = [
+            'Artikul', 'b.r.', '15', '15.5', '16', '16.5', '17', '17.5', '18.5',
+            '19', '19.5', '20.0', '20.5', '21', '21.5', '22', '22.5', '23',
+            '38', '40', '45'
+        ];
+
+        // Собираем данные из таблицы
+        rows.forEach(row => {
+            const cells = row.querySelectorAll('td');
+            const rowData = [];
+
+            cells.forEach((cell, index) => {
+                if (index === 0) {
+                    // Артикул (input)
+                    const input = cell.querySelector('input');
+                    rowData.push(input ? input.value : '');
+                } else if (index === 1) {
+                    // Чекбокс б.р.
+                    const input = cell.querySelector('input');
+                    rowData.push(input ? input.value : '');
+                } else {
+                    // Числовые поля
+                    const input = cell.querySelector('input');
+                    rowData.push(input ? input.value : '');
+                }
+            });
+
+            tableRows.push(rowData);
+        });
+
+        // Добавляем таблицу в PDF
+        doc.autoTable({
+            head: [headers],
+            body: tableRows,
+            startY: 40,
+            styles: {
+                fontSize: 8,
+                cellPadding: 2
+            },
+            headStyles: {
+                fillColor: [100, 100, 100]
+            },
+            margin: { top: 40 }
+        });
+
+        // Добавляем комментарий
+        const lastCell = doc.lastAutoTable.finalY;
+        doc.setFontSize(10);
+        doc.text('Комментарий к заказу:', 14, lastCell + 10);
+        doc.setFontSize(9);
+
+        // Разбиваем комментарий на строки, если он слишком длинный
+        const splitComment = doc.splitTextToSize(comment, 180);
+        doc.text(splitComment, 14, lastCell + 15);
+
+        // Сохраняем PDF
+        doc.save(`ЗАКАЗ_${client}_${date}.pdf`);
+    }
+
+    let activeRow = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const dateInput = document.getElementById('date');
+        dateInput.value = new Date().toISOString().split('T')[0];
+    });
+
+    // Функция для добавления обработчиков событий на строки таблицы
+    function addRowHighlighting() {
+        const tableBody = document.getElementById('orderTableBody');
+        const deleteBtn = document.getElementById('deleteSelectedBtn');
+
+        tableBody.addEventListener('click', function(e) {
+            const clickedRow = e.target.closest('tr');
+
+            if (clickedRow) {
+                // Убираем класс active у всех строк
+                const allRows = tableBody.querySelectorAll('tr');
+                allRows.forEach(row => row.classList.remove('active'));
+
+                // Добавляем класс active к кликнутой строке
+                clickedRow.classList.add('active');
+                activeRow = clickedRow;
+
+                // Активируем кнопку удаления
+                deleteBtn.disabled = false;
+            }
+        });
+
+        // Обработчик клика по кнопке удаления
+        deleteBtn.addEventListener('click', function() {
+            event.preventDefault()
+            if (activeRow) {
+                // Подтверждение удаления
+                if (confirm('Вы уверены, что хотите удалить эту строку?')) {
+                    // Удаляем активную строку
+                    activeRow.remove();
+                    activeRow = null;
+
+                    // Деактивируем кнопку удаления
+                    deleteBtn.disabled = true;
+
+                    // Показываем сообщение об успешном удалении
+                    showToast('Строка успешно удалена');
+                }
+            }
+        });
+    }
+
+    // Вызываем функцию после загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        addRowHighlighting();
+
+        // Добавляем Bootstrap Icons (если еще не подключены)
+        if (!document.querySelector('link[href*="bootstrap-icons"]')) {
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+            document.head.appendChild(link);
+        }
+    });
+
+    function Exit() {
+        document.cookie = "login=;max-age=-1";
+        document.cookie = "password=;max-age=-1";
+        location.reload()
+    }
+
+    // Добавить строку в таблицу
+    function addRow() {
+        const tbody = document.getElementById("orderTableBody");
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+                <td><input type="text" class="form-control form-control-sm" name="art" list="articuls"/></td>
+                <td><input type="number" class="form-control form-control-sm" name="br" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s15" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s15_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s16" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s16_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s17" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s17_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s18_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s19" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s19_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s20" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s20_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s21" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s21_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s22" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s22_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s23" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s38" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s40" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s45" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    function chengeColor(element) {
+        const value = parseInt(element.value);
+        if (value > 0) {
+            element.style.background = "#777777";
+            element.style.color = "#ffffff";
+        } else {
+            element.style.background = rgba(0,0,0,0);
+            element.style.color = "#000000";
+        }
+    }
+
+    // Собрать данные и отправить на API
+    function sendToAPI() {
+        saveToPDF()
+        const form = document.getElementById("orderForm");
+        const data = {
+            client: form.client.value,
+            date: form.date.value,
+            manager: document.getElementById("manager").textContent,
+            orderComment: form.orderComment.value,
+            items: []
+        };
+
+        const rows = document.querySelectorAll("#orderTableBody tr");
+        rows.forEach(row => {
+            const item = {};
+            item.art = row.querySelector("[name='art']").value;
+            item.sizes = {
+                    "br":parseInt(row.querySelector("[name='br']").value) || 0,
+                    "r15": parseInt(row.querySelector("[name='s15']").value) || 0,
+                    "r15_5": parseInt(row.querySelector("[name='s15_5']").value) || 0,
+                    "r16": parseInt(row.querySelector("[name='s16']").value) || 0,
+                    "r16_5": parseInt(row.querySelector("[name='s16_5']").value) || 0,
+                    "r17": parseInt(row.querySelector("[name='s17']").value) || 0,
+                    "r17_5": parseInt(row.querySelector("[name='s17_5']").value) || 0,
+                    "r18_5": parseInt(row.querySelector("[name='s18_5']").value) || 0,
+                    "r19": parseInt(row.querySelector("[name='s19']").value) || 0,
+                    "r19_5": parseInt(row.querySelector("[name='s19_5']").value) || 0,
+                    "r20_0": parseInt(row.querySelector("[name='s20']").value) || 0,
+                    "r20_5": parseInt(row.querySelector("[name='s20_5']").value) || 0,
+                    "r21": parseInt(row.querySelector("[name='s21']").value) || 0,
+                    "r21_5": parseInt(row.querySelector("[name='s21_5']").value) || 0,
+                    "r22": parseInt(row.querySelector("[name='s22']").value) || 0,
+                    "r22_5": parseInt(row.querySelector("[name='s22_5']").value) || 0,
+                    "r23": parseInt(row.querySelector("[name='s23']").value) || 0,
+                    "r38": parseInt(row.querySelector("[name='s38']").value) || 0,
+                    "r40": parseInt(row.querySelector("[name='s40']").value) || 0,
+                    "r45": parseInt(row.querySelector("[name='s45']").value) || 0
+            };
+            data.items.push(item);
+        });
+
+        // Пример отправки на API
+        fetch('http://192.168.1.136:5000/api/add_order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Данные успешно отправлены!');
+            } else {
+                alert('Ошибка при отправке данных.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Не удалось отправить данные.');
+        });
+    }
+
+    // Добавить одну пустую строку при загрузке
+    document.addEventListener("DOMContentLoaded", () => {
+        addRow();
+    });
+</script>
+{% endblock %}
