@@ -25,7 +25,7 @@ class Order(db.Model):
         return self.json_str
 
 class Client(db.Model):
-    inn = db.Column(db.Integer, primary_key=True)
+    inn = db.Column(db.String(255), primary_key=True)
     name = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
