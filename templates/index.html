@@ -56,14 +56,14 @@
             </div>
             <div class="col-md-4">
                 <div class="d-flex justify-content-end align-items-center gap-3">
-                    <h5 class="mb-0" id="manager" required>{{ username }}</h5>
+                    <h5 class="mb-0" required>{{ username }}</h5>
                     <button type="button" class="btn btn-info text-white" onclick="Exit()">Выйти</button>
                 </div>
             </div>
     </div>
     <form id="orderForm">
         <div class="row mb-3">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label"><strong>Клиент:</strong></label>
                 <input type="text" class="form-control" id="client" name="client" list="clients" />
                 <datalist id="clients">
@@ -72,7 +72,16 @@
                     {% endfor %}
                 </datalist>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label class="form-label"><strong>Менеджер:</strong></label>
+                <input type="text" class="form-control" id="manager" name="client" list="managers" />
+                <datalist id="managers">
+                    {% for el in managers %}
+                        <option>{{el}}</option>
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col-md-4">
                 <label class="form-label"><strong>Дата:</strong></label>
                 <input type="date" class="form-control" id="date" required />
             </div>
@@ -141,7 +150,7 @@
     // Сохранить как PDF
     function saveToPDF() {
         // Создаем новый PDF документ
-        const doc = new jsPDF();
+        const doc = new jsPDF('l', 'mm', 'a4');
 
         doc.addFont('static/DejaVuSans.ttf', 'DejaVuSans', 'normal');
 
@@ -149,17 +158,19 @@
 
         // Получаем данные из формы
         const client = document.getElementById('client').value || '-';
+        const manager = document.getElementById('manager').value || '-';
         const date = document.getElementById('date').value || '-';
         const comment = document.getElementById('orderComment').value || '-';
 
         // Добавляем заголовок
         doc.setFontSize(15);
-        doc.text('ЗАКАЗ', 105, 15, { align: 'center' });
+        doc.text('ЗАКАЗ', 150, 15, { align: 'center' });
 
         // Добавляем информацию о клиенте и дате
         doc.setFontSize(10);
         doc.text(`Клиент: ${client}`, 14, 25);
-        doc.text(`Дата: ${date}`, 14, 32);
+        doc.text(`Мененджер: ${manager}`, 14, 32);
+        doc.text(`Дата: ${date}`, 14, 39);
 
         // Подготавливаем данные для таблицы
         const tableRows = [];
@@ -201,7 +212,7 @@
         doc.autoTable({
             head: [headers],
             body: tableRows,
-            startY: 40,
+            startY: 46,
             styles: {
                 fontSize: 8,
                 cellPadding: 2
@@ -209,7 +220,7 @@
             headStyles: {
                 fillColor: [100, 100, 100]
             },
-            margin: { top: 40 }
+            margin: { top: 46 }
         });
 
         // Добавляем комментарий
@@ -338,12 +349,30 @@
 
     // Собрать данные и отправить на API
     function sendToAPI() {
-        saveToPDF()
+
         const form = document.getElementById("orderForm");
+
+        // Проверка обязательных полей
+        const manager = form.manager.value.trim();
+        const client = form.client.value.trim();
+
+        if (!manager) {
+            alert('Поле "Менеджер" должно быть заполнено!');
+            return;
+        }
+
+        if (!client) {
+            alert('Поле "Клиент" должно быть заполнено!');
+            form.client.focus();
+            return;
+        }
+
+        saveToPDF()
+
         const data = {
             client: form.client.value,
             date: form.date.value,
-            manager: document.getElementById("manager").textContent,
+            manager: form.manager.value,
             orderComment: form.orderComment.value,
             items: []
         };

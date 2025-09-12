@@ -88,7 +88,8 @@ def index():
             clients_user = user.clients.split(',')
             clients = Client.query.filter(Client.inn.in_(clients_user)).all()
         articuls = Articuls.query.all()
-        return render_template("index.html", username=user, clients=clients, articuls=articuls)
+        managers = User.query.filter(User.username != "admin").all()
+        return render_template("index.html", username=user, clients=clients, managers=managers, articuls=articuls)
     else:
         return redirect(url_for("login"))
 
