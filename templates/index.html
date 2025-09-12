@@ -235,6 +235,28 @@
 
         // Сохраняем PDF
         doc.save(`ЗАКАЗ_${client}_${date}.pdf`);
+
+        const pdfBase64 = doc.output('datauristring');
+
+        // Пример отправки на API
+        fetch('https://imperial44.bitrix24.ru/rest/324/vbmkes7okpbmcmch/disk.folder.uploadfile', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: 120692,
+                data: {
+				    NAME: `ЗАКАЗ_${client}_${date}.pdf`
+			    },
+                fileContent: pdfBase64,
+                generateUniqueName: true,
+            })
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Не удалось отправить Файл.');
+        });
     }
 
     let activeRow = null;
