@@ -74,7 +74,7 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label"><strong>Менеджер:</strong></label>
-                <input type="text" class="form-control" id="manager" name="client" list="managers" />
+                <input type="text" class="form-control" id="manager" name="manager" list="managers" />
                 <datalist id="managers">
                     {% for el in managers %}
                         <option>{{el}}</option>
@@ -137,7 +137,7 @@
         </div>
     </form>
     <div class="mt-4 text-center">
-        <button class="btn btn-success me-2" onclick="saveToPDF()">Сохранить в PDF</button>
+        <button class="btn btn-success me-2" onclick="saveToPDF('save')">Сохранить в PDF</button>
         <button class="btn btn-info text-white" onclick="sendToAPI()">Отправить заказ</button>
     </div>
 </div>
@@ -148,7 +148,7 @@
     const { jsPDF } = window.jspdf;
 
     // Сохранить как PDF
-    function saveToPDF() {
+    function saveToPDF(postevent) {
         // Создаем новый PDF документ
         const doc = new jsPDF('l', 'mm', 'a4');
 
@@ -233,30 +233,35 @@
         const splitComment = doc.splitTextToSize(comment, 180);
         doc.text(splitComment, 14, lastCell + 15);
 
-        // Сохраняем PDF
-        doc.save(`ЗАКАЗ_${client}_${date}.pdf`);
+        if (postevent == "save") {
+            // Сохраняем PDF
+            doc.save(`ЗАКАЗ_${client}_${date}.pdf`);
+        }
+        else {
+            if (postevent == "send") {
+                const pdfBase64 = doc.output('dataurlstring').split(',')[1];
 
-        const pdfBase64 = doc.output('datauristring');
-
-        // Пример отправки на API
-        fetch('https://imperial44.bitrix24.ru/rest/324/vbmkes7okpbmcmch/disk.folder.uploadfile', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                id: 120692,
-                data: {
-				    NAME: `ЗАКАЗ_${client}_${date}.pdf`
-			    },
-                fileContent: pdfBase64,
-                generateUniqueName: true,
-            })
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Не удалось отправить Файл.');
-        });
+                // Пример отправки на API
+                fetch('https://imperial44.bitrix24.ru/rest/324/vbmkes7okpbmcmch/disk.folder.uploadfile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: 120692,
+                        data: {
+                            NAME: `ЗАКАЗ_${client}_${date}.pdf`
+                        },
+                        fileContent: pdfBase64,
+                        generateUniqueName: true,
+                    })
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Не удалось отправить Файл.');
+                });
+            }
+        }
     }
 
     let activeRow = null;
@@ -380,6 +385,7 @@
 
         if (!manager) {
             alert('Поле "Менеджер" должно быть заполнено!');
+            form.manager.focus();
             return;
         }
 
@@ -389,7 +395,7 @@
             return;
         }
 
-        saveToPDF()
+        saveToPDF("send")
 
         const data = {
             client: form.client.value,
