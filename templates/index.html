@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block head %}
-    <title>Бланк заказа для выставки</title>
+    <title>Заказ клиента</title>
 {% endblock %}
 {% block body %}
 <style>
@@ -46,13 +46,13 @@
         cursor: not-allowed;
     }
 </style>
-<div class="container mt-4 p-4 bg-white shadow rounded" id="printable-area">
+<div class="p-4" id="printable-area">
     <div class="row mb-3">
             <div class="col-md-4">
                 <img class="w-25" src="static/logo.svg" alt="Логотип" style="max-width: 200px;">
             </div>
             <div class="col-md-4">
-                <h3 class="text-center mb-4">Бланк заказа для выставки</h3>
+                <h3 class="text-center mb-4">Заказ клиента</h3>
             </div>
             <div class="col-md-4">
                 <div class="d-flex justify-content-end align-items-center gap-3">
