@@ -339,28 +339,33 @@
 
         row.innerHTML = `
                 <td><input type="text" class="form-control form-control-sm" name="art" list="articuls"/></td>
-                <td><input type="number" class="form-control form-control-sm" name="br" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s15" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s15_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s16" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s16_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s17" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s17_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s18_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s19" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s19_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s20" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s20_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s21" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s21_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s22" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s22_5" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s23" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s38" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s40" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
-                <td><input type="number" class="form-control form-control-sm" name="s45" min="0" value="0" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="br" min="0" value="" oninput="validateNumberInput(this)" onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s15" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s15_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s16" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s16_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s17" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s17_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s18_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s19" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s19_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s20" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s20_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s21" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s21_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s22" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s22_5" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s23" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s38" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s40" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
+                <td><input type="number" class="form-control form-control-sm" name="s45" min="0" value="" oninput="validateNumberInput(this)"  onchange="chengeColor(this)" style="background: rgba(0,0,0,0)"></td>
         `;
         tbody.appendChild(row);
+    }
+
+    function validateNumberInput(input) {
+    // Удаляем все нецифровые символы
+    input.value = input.value.replace(/[^\d]/g, '');
     }
 
     function chengeColor(element) {
