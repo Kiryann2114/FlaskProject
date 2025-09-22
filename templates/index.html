@@ -179,7 +179,7 @@
 
         // Заголовки колонок
         const headers = [
-            'Artikul', 'b.r.', '15', '15.5', '16', '16.5', '17', '17.5', '18.5',
+            'Артикул', 'б.р.', '15', '15.5', '16', '16.5', '17', '17.5', '18.5',
             '19', '19.5', '20.0', '20.5', '21', '21.5', '22', '22.5', '23',
             '38', '40', '45'
         ];
@@ -214,11 +214,21 @@
             body: tableRows,
             startY: 46,
             styles: {
+                font: 'DejaVuSans',
+                fontStyle: 'normal',
                 fontSize: 8,
-                cellPadding: 2
+                cellPadding: 2,
+                textColor: [0, 0, 0]
             },
             headStyles: {
-                fillColor: [100, 100, 100]
+                fillColor: [100, 100, 100],
+                font: 'DejaVuSans',
+                fontStyle: 'normal',
+                textColor: [255, 255, 255]
+            },
+            bodyStyles: {
+                font: 'DejaVuSans',
+                fontStyle: 'normal'
             },
             margin: { top: 46 }
         });
