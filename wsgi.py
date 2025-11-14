@@ -1,11 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, jsonify
 from BD_models import db, User, Client, Articuls, Order, Questionnaire
 from utils import check_user,send_file, create_task, send_message, check_task
+from flask_cors import CORS
 import threading
 import schedule
 import time
 
 app = Flask(__name__)
+# Разрешаем CORS для всех маршрутов
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
