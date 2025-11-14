@@ -186,7 +186,7 @@ def create_task(file_id, full_name):
         # Формируем данные запроса
         payload = {
             "fields": {
-                "TITLE": full_name,
+                "TITLE": "Анкета " + full_name,
                 "DEADLINE": formatted_date,
                 "CREATED_BY": 98,
                 "RESPONSIBLE_ID": 22,
