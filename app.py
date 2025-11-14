@@ -1,84 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, abort
-from flask_sqlalchemy import SQLAlchemy
-import json
-import hashlib
+from flask import Flask, render_template, request, redirect, url_for, abort, jsonify
+from BD_models import db, User, Client, Articuls, Order, Questionnaire
+from utils import check_user,send_file, create_task, send_message, check_task
+import threading
+import schedule
+import time
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-db = SQLAlchemy(app)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-class User(db.Model):
-    login = db.Column(db.String(255), nullable=False, primary_key=True,)
-    username = db.Column(db.String(255), nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    clients = db.Column(db.Text, nullable=True)
-
-    def __repr__(self):
-        return self.username
-
-class Order(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    passed = db.Column(db.Boolean, nullable=False)
-    json_str = db.Column(db.Text, nullable=False)
-
-    def __repr__(self):
-        return self.json_str
-
-class Client(db.Model):
-    inn = db.Column(db.String(255), primary_key=True)
-    name = db.Column(db.String(255), nullable=False)
-
-    def __repr__(self):
-        return self.name + " : " + str(self.inn)
-
-class Articuls(db.Model):
-    articul = db.Column(db.String(255), primary_key=True)
-
-    def __repr__(self):
-        return self.articul
+# Привязываем db к приложению
+db.init_app(app)
 
 with app.app_context():
     db.create_all()
 
 
-def hash_password(password):
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
-def check_user(request):
-    if request.cookies.get("login") != None and request.cookies.get("password") != None:
-        login = request.cookies.get("login").encode('latin-1').decode('utf-8')
-        password = request.cookies.get("password")
-        print(hash_password(password))
-        user = User.query.filter_by(login=login,password=hash_password(password)).first()
-        return user
-    return None
-
-'''
-# Пути, которые доступны всем
-PUBLIC_PATHS = ['/', '/login', '/api/add_order']
-
-# IP локальной сети
-LOCAL_NETWORKS = ['127.0.0.1', '192.168.', '10.0.']
-
-
-@app.before_request
-def restrict_access():
-    path = request.path
-
-    # Пропускаем публичные пути
-    if any(path.startswith(public_path) for public_path in PUBLIC_PATHS):
-        return None
-
-    client_ip = request.remote_addr
-
-    # Проверяем, находится ли IP в локальной сети
-    is_local = any(client_ip.startswith(network) for network in LOCAL_NETWORKS)
-
-    if not is_local:
-        abort(403)
-'''
-
-
+### Orders
 @app.route('/')
 def index():
     user = check_user(request)
@@ -99,7 +38,6 @@ def login():
         return render_template('login.html')
     elif request.method == 'POST':
         return redirect("/")
-
 
 #API
 @app.route('/api/add_order', methods=['POST'])
@@ -138,5 +76,64 @@ def passed_order():
             return "Ошибка при обновлении"
 
 
+
+### Kandidat
+@app.route('/api/anket', methods=['POST'])
+def anket():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'error': 'Нет данных'}), 400
+
+    file_id, full_name = send_file(data)
+    task_id = create_task(file_id, full_name)
+
+    # Сохранение в базу данных
+    new_application = Questionnaire(
+        file_id=file_id,
+        full_name=full_name,
+        task_id=task_id,
+        status=False
+    )
+    db.session.add(new_application)
+    db.session.commit()
+
+    message = f'https://imperial44.bitrix24.ru/company/personal/user/0/tasks/task/view/{task_id}/'
+    send_message("chat14882", message)
+
+    return jsonify({
+        'message': 'Анкета успешно получена',
+        'data': data  # можно убрать в продакшене
+    }), 200
+
+# Фоновая задача — проверка заявок со статусом False
+def check_pending_applications():
+    with app.app_context():
+        try:
+            pending_apps = Questionnaire.query.filter_by(status=False).all()
+            for app_record in pending_apps:
+                comment = check_task(app_record.task_id)
+                if comment != '':
+                    app_record.status = True
+                    db.session.commit()
+                    send_message("chat14886", f"ФИО: {app_record.full_name} \n Комментарий СБ: {comment} \n\n Анкета: https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1")
+
+        except Exception as e:
+            print(f"Ошибка при проверке заявок: {e}")
+
+# Фоновый цикл для schedule запуск раз в 1 минуту
+def run_scheduler():
+    schedule.every(1).minutes.do(check_pending_applications)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+
+# Запуск Фоновой функции в отдельном потоке при старте приложения
+threading.Thread(target=run_scheduler, daemon=True).start()
+
+
+
+# Запуск приложения
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
