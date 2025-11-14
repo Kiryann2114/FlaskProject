@@ -55,7 +55,11 @@ def save_to_docx(form_data):
         ("Телефон", form_data['personalInfo'].get("phone", "Не указано")),
         ("Email", form_data['personalInfo'].get("email", "Не указано")),
         ("Семейное положение", form_data['personalInfo'].get("familyStatus", "Не указано")),
-        ("Паспорт", form_data['personalInfo'].get("passport", "Не указано")),
+        ("Паспорт серия", form_data['personalInfo'].get("passport_ser", "Не указано")),
+        ("Паспорт номер", form_data['personalInfo'].get("passport_num", "Не указано")),
+        ("Паспорт код подразделения", form_data['personalInfo'].get("passport_cod", "Не указано")),
+        ("Паспорт дата", form_data['personalInfo'].get("passport_date", "Не указано")),
+        ("Паспорт выдан", form_data['personalInfo'].get("passport_otdel", "Не указано")),
         ("Автомобиль", form_data['personalInfo'].get("autonumber", "Не указано")),
         ("Узнал о вакансии", form_data['personalInfo'].get("vacancySource", "Не указано")),
         ("Желаемая зарплата", form_data['personalInfo'].get("desiredSalary", "Не указано")),
@@ -114,6 +118,9 @@ def save_to_docx(form_data):
         doc.add_paragraph("Опыт работы не указан")
 
     # Подпись
+    doc.add_paragraph("Достоверность указанных сведений: Подтверждено")
+    doc.add_paragraph("Согласие на обработку персональных данных: Получено")
+
     signature_date = form_data['personalInfo'].get("signatureDate", "Не указано")
     p = doc.add_paragraph()
     p.add_run("Дата: ").bold = True
