@@ -208,7 +208,7 @@ def create_task(file_id, full_name):
                     }
                 ],
                 "PARENT_ID": "19024",
-                "AUDITORS": [324]
+                "AUDITORS": [324,176]
             }
         }
 
