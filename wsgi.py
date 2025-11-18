@@ -119,7 +119,7 @@ def check_pending_applications():
                 if comment != '':
                     app_record.status = True
                     db.session.commit()
-                    send_message("chat14886", f"ФИО: {app_record.full_name} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/ URL]")
+                    send_message("chat14886", f"ФИО: {app_record.full_name} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
 
         except Exception as e:
             print(f"Ошибка при проверке заявок: {e}")
