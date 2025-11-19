@@ -41,7 +41,7 @@ class Questionnaire(db.Model):
     task_id = db.Column(db.Integer, primary_key=True)
     file_id = db.Column(db.String, nullable=False)
     full_name = db.Column(db.String, nullable=False)
-    vacancy = db.Column(db.String, nullable=False)
+    vacancy = db.Column(db.String, nullable=True)
     status = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
