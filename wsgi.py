@@ -127,11 +127,11 @@ def check_pending_applications():
 
 # Фоновый цикл для schedule запуск раз в 1 минуту
 def run_scheduler():
-    schedule.every(5).minutes.do(check_pending_applications)
+    schedule.every(1).minutes.do(check_pending_applications)
 
     while True:
         schedule.run_pending()
-        time.sleep(1)
+        time.sleep(30)
 
 # Запуск Фоновой функции в отдельном потоке при старте приложения
 threading.Thread(target=run_scheduler, daemon=True).start()
