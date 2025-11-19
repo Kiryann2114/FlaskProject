@@ -139,13 +139,14 @@ def save_to_docx(form_data):
     full_name = form_data['personalInfo'].get("fullName", "соискателя").split()[0]
     filename = f"Анкета_{full_name}_{datetime.now().strftime('%Y-%m-%d')}.docx"
     full_name = form_data['personalInfo'].get("fullName", "Не указано")
+    vacancy = form_data['personalInfo'].get("position", "Не указано")
 
-    return base64_content, filename, full_name
+    return base64_content, filename, full_name, vacancy
 
 # Отправка файла в Bitrix24
 def send_file(form_data):
 
-    base64_content, filename, full_name = save_to_docx(form_data)
+    base64_content, filename, full_name, vacancy = save_to_docx(form_data)
 
     url = "https://imperial44.bitrix24.ru/rest/324/vbmkes7okpbmcmch/disk.folder.uploadfile"
 
@@ -170,7 +171,7 @@ def send_file(form_data):
         # Проверяем статус ответа
         if response.status_code == 200:
             print("Файл создан")
-            return response.json()['result']['ID'], full_name
+            return response.json()['result']['ID'], full_name, vacancy
         else:
             print(f"Ошибка: {response.status_code}")
             print(f"Текст ответа: {response.text}")
@@ -298,4 +299,6 @@ def check_task(task_id):
         print(f"Произошла ошибка: {e}")
         return None
 
+
+### TP 1C
 

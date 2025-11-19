@@ -41,7 +41,27 @@ class Questionnaire(db.Model):
     task_id = db.Column(db.Integer, primary_key=True)
     file_id = db.Column(db.String, nullable=False)
     full_name = db.Column(db.String, nullable=False)
+    vacancy = db.Column(db.String, nullable=False)
     status = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
         return self.status
+
+
+### TP 1C
+class Account_tp(db.Model):
+    login = db.Column(db.String, primary_key=True)
+    password = db.Column(db.String, nullable=False)
+
+    def __repr__(self):
+        return self.login
+
+class Application_tp(db.Model):
+    id = db.Column(db.String, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    login_acc = db.Column(db.String, nullable=False)
+    status = db.Column(db.String, default=False)
+    time = db.Column(db.String, default=False)
+
+    def __repr__(self):
+        return self.id,self.title,self.login_acc,self.status,self.time

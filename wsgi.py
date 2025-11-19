@@ -88,7 +88,7 @@ def anket():
     if not data:
         return jsonify({'error': 'Нет данных'}), 400
 
-    file_id, full_name = send_file(data)
+    file_id, full_name, vacancy = send_file(data)
     task_id = create_task(file_id, full_name)
 
     # Сохранение в базу данных
@@ -96,6 +96,7 @@ def anket():
         file_id=file_id,
         full_name=full_name,
         task_id=task_id,
+        vacancy=vacancy,
         status=False
     )
     db.session.add(new_application)
@@ -116,10 +117,10 @@ def check_pending_applications():
             pending_apps = Questionnaire.query.filter_by(status=False).all()
             for app_record in pending_apps:
                 comment = check_task(app_record.task_id)
-                if comment != '':
+                if comment != '' and app_record.status == False:
                     app_record.status = True
                     db.session.commit()
-                    send_message("chat14886", f"ФИО: {app_record.full_name} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
+                    send_message("chat14886", f"ФИО: {app_record.full_name} Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
 
         except Exception as e:
             print(f"Ошибка при проверке заявок: {e}")
@@ -134,6 +135,46 @@ def run_scheduler():
 
 # Запуск Фоновой функции в отдельном потоке при старте приложения
 threading.Thread(target=run_scheduler, daemon=True).start()
+
+
+
+### TP 1C
+
+@app.route('/api/create_application_tp', methods=['POST'])
+def create_application_tp():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'error': 'Нет данных'}), 400
+
+    return data
+
+@app.route('/api/delete_application_tp', methods=['POST'])
+def delete_application_tp():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'error': 'Нет данных'}), 400
+
+    return data
+
+@app.route('/api/update_application_tp', methods=['POST'])
+def update_application_tp():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'error': 'Нет данных'}), 400
+
+    return data
+
+@app.route('/api/get_application_tp', methods=['POST'])
+def get_application_tp():
+    data = request.get_json()
+
+    if not data:
+        return jsonify({'error': 'Нет данных'}), 400
+
+    return data
 
 
 
