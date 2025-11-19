@@ -131,7 +131,7 @@ def run_scheduler():
 
     while True:
         schedule.run_pending()
-        time.sleep(30)
+        time.sleep(1)
 
 # Запуск Фоновой функции в отдельном потоке при старте приложения
 threading.Thread(target=run_scheduler, daemon=True).start()
