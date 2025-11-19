@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, jsonify
 from BD_models import db, User, Client, Articuls, Order, Questionnaire
-from utils import check_user,send_file, create_task, send_message, check_task
+from utils import check_user, send_file, create_task, send_message, check_task
 from flask_cors import CORS
-import threading
-import schedule
-import time
+from apscheduler.schedulers.background import BackgroundScheduler
+import atexit
 
 app = Flask(__name__)
 # Разрешаем CORS для всех маршрутов
@@ -17,7 +16,6 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
-
 
 
 ### Orders
@@ -35,6 +33,7 @@ def index():
     else:
         return redirect(url_for("login"))
 
+
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
@@ -42,7 +41,8 @@ def login():
     elif request.method == 'POST':
         return redirect("/")
 
-#API
+
+# API
 @app.route('/api/add_order', methods=['POST'])
 def add_order():
     if request.method == 'POST' and check_user(request):
@@ -50,13 +50,15 @@ def add_order():
         if len(client_split) < 2:
             client_split.append("")
         request.json["client"] = {"name": client_split[0], "inn": client_split[1]}
-        order = Order(passed=False,json_str=str(request.json))
+        order = Order(passed=False, json_str=str(request.json))
         try:
             db.session.add(order)
             db.session.commit()
             return "Добавление ордера прошло успешно"
-        except:
-            return "Произошла ошибка при добавлении ордера"
+        except Exception as e:
+            db.session.rollback()
+            return "Произошла ошибка при добавлении ордера", 500
+
 
 @app.route('/api/get_orders')
 def get_orders():
@@ -65,6 +67,7 @@ def get_orders():
     for order in orders:
         struct.append({'id': order.id, 'json': eval(order.json_str)})
     return struct
+
 
 @app.route('/api/passed_order', methods=['POST'])
 def passed_order():
@@ -75,9 +78,9 @@ def passed_order():
         try:
             db.session.commit()
             return "Обновление прошло успешно"
-        except:
-            return "Ошибка при обновлении"
-
+        except Exception as e:
+            db.session.rollback()
+            return "Ошибка при обновлении", 500
 
 
 ### Kandidat
@@ -110,6 +113,7 @@ def anket():
         'data': data  # можно убрать в продакшене
     }), 200
 
+
 # Фоновая задача — проверка заявок со статусом False
 def check_pending_applications():
     with app.app_context():
@@ -117,25 +121,28 @@ def check_pending_applications():
             pending_apps = Questionnaire.query.filter_by(status=False).all()
             for app_record in pending_apps:
                 comment = check_task(app_record.task_id)
-                if comment != '':
+                if comment.strip():  # проверяем, что комментарий не пустой
                     app_record.status = True
                     db.session.commit()
                     send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
-
         except Exception as e:
             print(f"Ошибка при проверке заявок: {e}")
 
-# Фоновый цикл для schedule запуск раз в 1 минуту
-def run_scheduler():
-    schedule.every(1).minutes.do(check_pending_applications)
 
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+### Scheduler setup — замена threading + schedule
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=check_pending_applications, trigger="interval", minutes=1)
+    scheduler.start()
 
-# Запуск Фоновой функции в отдельном потоке при старте приложения
-threading.Thread(target=run_scheduler, daemon=True).start()
+    # Остановка планировщика при завершении приложения
+    atexit.register(lambda: scheduler.shutdown())
 
+
+# Инициализация планировщика после создания контекста
+with app.app_context():
+    db.create_all()
+    start_scheduler()
 
 
 ### TP 1C
@@ -143,39 +150,33 @@ threading.Thread(target=run_scheduler, daemon=True).start()
 @app.route('/api/create_application_tp', methods=['POST'])
 def create_application_tp():
     data = request.get_json()
-
     if not data:
         return jsonify({'error': 'Нет данных'}), 400
+    return jsonify({'status': 'success', 'data': data}), 200
 
-    return data
 
 @app.route('/api/delete_application_tp', methods=['POST'])
 def delete_application_tp():
     data = request.get_json()
-
     if not data:
         return jsonify({'error': 'Нет данных'}), 400
+    return jsonify({'status': 'success'}), 200
 
-    return data
 
 @app.route('/api/update_application_tp', methods=['POST'])
 def update_application_tp():
     data = request.get_json()
-
     if not data:
         return jsonify({'error': 'Нет данных'}), 400
+    return jsonify({'status': 'success', 'data': data}), 200
 
-    return data
 
 @app.route('/api/get_application_tp', methods=['POST'])
 def get_application_tp():
     data = request.get_json()
-
     if not data:
         return jsonify({'error': 'Нет данных'}), 400
-
-    return data
-
+    return jsonify({'status': 'success', 'data': data}), 200
 
 
 # Запуск приложения
