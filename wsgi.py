@@ -114,7 +114,7 @@ def anket():
 def check_pending_applications():
     with app.app_context():
         try:
-            pending_apps = Questionnaire.query.filter_by(status=False).first()
+            pending_apps = Questionnaire.query.filter_by(status=False).all()
             for app_record in pending_apps:
                 comment = check_task(app_record.task_id)
                 if comment != '':
