@@ -180,10 +180,4 @@ def get_application_tp():
 
 # Запуск приложения
 if __name__ == '__main__':
-    # Проверяем, не запущен ли уже scheduler
-    global scheduler_started
-    if not scheduler_started:
-        scheduler_started = True
-        threading.Thread(target=run_scheduler, daemon=True).start()
-
     app.run(debug=False, host='0.0.0.0')
