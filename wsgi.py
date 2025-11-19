@@ -126,7 +126,7 @@ def check_pending_applications():
             print(f"Ошибка при проверке заявок: {e}")
 
 # Фоновый цикл для schedule запуск раз в 1 минуту
-def run_scheduler():
+def run_scheduler_1():
     schedule.every(1).minutes.do(check_pending_applications)
 
     while True:
@@ -134,7 +134,7 @@ def run_scheduler():
         time.sleep(1)
 
 # Запуск Фоновой функции в отдельном потоке при старте приложения
-threading.Thread(target=run_scheduler, daemon=True).start()
+threading.Thread(target=run_scheduler_1, daemon=True).start()
 
 
 
@@ -180,4 +180,10 @@ def get_application_tp():
 
 # Запуск приложения
 if __name__ == '__main__':
+    # Проверяем, не запущен ли уже scheduler
+    global scheduler_started
+    if not scheduler_started:
+        scheduler_started = True
+        threading.Thread(target=run_scheduler, daemon=True).start()
+
     app.run(debug=False, host='0.0.0.0')
