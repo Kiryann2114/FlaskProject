@@ -115,11 +115,9 @@ def check_pending_applications():
     with app.app_context():
         try:
             pending_apps = Questionnaire.query.filter_by(status=False).all()
-            print(pending_apps)
             for app_record in pending_apps:
-                print(app_record)
                 comment = check_task(app_record.task_id)
-                if comment != '':
+                if comment != '' and app_record.status == False:
                     app_record.status = True
                     db.session.commit()
                     send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
