@@ -115,16 +115,13 @@ def check_pending_applications():
     with app.app_context():
         try:
             pending_apps = Questionnaire.query.filter_by(status=False).all()
-            print(f"[SCHEDULER] Найдено анкет со статусом False: {len(pending_apps)}")
             for app_record in pending_apps:
-                print(f"[SCHEDULER] Проверка анкеты ID={app_record.id}, task_id={app_record.task_id}, ФИО={app_record.full_name}")
                 comment = check_task(app_record.task_id)
-                print(f"[SCHEDULER] Получен комментарий для task_id={app_record.task_id}: '{comment}'")
                 if comment != '':
                     app_record.status = True
                     db.session.commit()
-                    print(f"[SCHEDULER] ✅ Статус обновлён для ID={app_record.id}. Отправка сообщения...")
                     send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
+
         except Exception as e:
             print(f"Ошибка при проверке заявок: {e}")
 
