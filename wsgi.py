@@ -139,6 +139,7 @@ def run_scheduler():
 threading.Thread(target=run_scheduler, daemon=True).start()
 
 
+
 ### TP 1C
 
 @app.route('/api/create_application_tp', methods=['POST'])
@@ -181,4 +182,4 @@ def get_application_tp():
 
 # Запуск приложения
 if __name__ == '__main__':
-    app.run(debug=False, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
