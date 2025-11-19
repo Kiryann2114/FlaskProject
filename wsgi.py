@@ -114,12 +114,13 @@ def anket():
 def check_pending_applications():
     with app.app_context():
         try:
-            app_record = Questionnaire.query.filter_by(status=False).first()
-            comment = check_task(app_record.task_id)
-            if comment != '':
-                app_record.status = True
-                db.session.commit()
-                send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
+            pending_apps = Questionnaire.query.filter_by(status=False).first()
+            for app_record in pending_apps:
+                comment = check_task(app_record.task_id)
+                if comment != '':
+                    app_record.status = True
+                    db.session.commit()
+                    send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
 
         except Exception as e:
             print(f"Ошибка при проверке заявок: {e}")
@@ -179,4 +180,4 @@ def get_application_tp():
 
 # Запуск приложения
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+    app.run(debug=False, host='0.0.0.0')
