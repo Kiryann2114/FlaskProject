@@ -135,7 +135,8 @@ def run_scheduler():
         schedule.run_pending()
         time.sleep(1)
 
-
+# Запуск Фоновой функции в отдельном потоке при старте приложения
+threading.Thread(target=run_scheduler, daemon=True).start()
 
 
 ### TP 1C
@@ -180,7 +181,4 @@ def get_application_tp():
 
 # Запуск приложения
 if __name__ == '__main__':
-    # Запуск Фоновой функции в отдельном потоке при старте приложения
-    threading.Thread(target=run_scheduler, daemon=True).start()
-
     app.run(debug=False, host='0.0.0.0')
