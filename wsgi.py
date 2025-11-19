@@ -1,6 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, jsonify
-from sqlalchemy import false
-
 from BD_models import db, User, Client, Articuls, Order, Questionnaire
 from utils import check_user,send_file, create_task, send_message, check_task
 from flask_cors import CORS
@@ -116,18 +114,15 @@ def anket():
 def check_pending_applications():
     with app.app_context():
         try:
-            # Получаем все заявки со статусом False
             pending_apps = Questionnaire.query.filter_by(status=False).all()
             for app_record in pending_apps:
                 comment = check_task(app_record.task_id)
                 if comment != '':
-                    # Пытаемся обновить статус ТОЛЬКО если он ещё False
-                    updated = Questionnaire.query.filter_by(id=app_record.id, status=False).update({'status': True})
-                    db.session.commit()  # коммитим обновление
-                    if updated:
-                        send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
+                    app_record.status = True
+                    db.session.commit()
+                    send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
+
         except Exception as e:
-            db.session.rollback()
             print(f"Ошибка при проверке заявок: {e}")
 
 # Фоновый цикл для schedule запуск раз в 1 минуту
@@ -137,6 +132,10 @@ def run_scheduler():
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+# Запуск Фоновой функции в отдельном потоке при старте приложения
+threading.Thread(target=run_scheduler, daemon=True).start()
+
 
 
 ### TP 1C
@@ -181,6 +180,4 @@ def get_application_tp():
 
 # Запуск приложения
 if __name__ == '__main__':
-    # Запуск фонового потока
-    threading.Thread(target=run_scheduler, daemon=True).start()
-    app.run(debug=False, host='0.0.0.0')
+    app.run(debug=True, host='0.0.0.0')
