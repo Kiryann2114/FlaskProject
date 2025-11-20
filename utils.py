@@ -298,3 +298,7 @@ def check_task(task_id):
     except Exception as e:
         print(f"Произошла ошибка: {e}")
         return None
+
+
+### TP 1C
+
