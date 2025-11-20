@@ -33,7 +33,6 @@ def index():
     else:
         return redirect(url_for("login"))
 
-
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
@@ -59,7 +58,6 @@ def add_order():
             db.session.rollback()
             return "Произошла ошибка при добавлении ордера", 500
 
-
 @app.route('/api/get_orders')
 def get_orders():
     orders = Order.query.filter_by(passed=False).all()
@@ -67,7 +65,6 @@ def get_orders():
     for order in orders:
         struct.append({'id': order.id, 'json': eval(order.json_str)})
     return struct
-
 
 @app.route('/api/passed_order', methods=['POST'])
 def passed_order():
@@ -113,44 +110,6 @@ def anket():
         'data': data  # можно убрать в продакшене
     }), 200
 
-
-
-### TP 1C
-
-@app.route('/api/create_application_tp', methods=['POST'])
-def create_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success', 'data': data}), 200
-
-
-@app.route('/api/delete_application_tp', methods=['POST'])
-def delete_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success'}), 200
-
-
-@app.route('/api/update_application_tp', methods=['POST'])
-def update_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success', 'data': data}), 200
-
-
-@app.route('/api/get_application_tp', methods=['POST'])
-def get_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success', 'data': data}), 200
-
-
-
-
 # Фоновая задача — проверка заявок со статусом False
 def check_pending_applications():
     with app.app_context():
@@ -164,7 +123,6 @@ def check_pending_applications():
                     send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
         except Exception as e:
             print(f"Ошибка при проверке заявок: {e}")
-
 
 ### Scheduler setup — замена threading + schedule
 def start_scheduler():
