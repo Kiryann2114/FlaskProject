@@ -114,43 +114,6 @@ def anket():
     }), 200
 
 
-
-### TP 1C
-
-@app.route('/api/create_application_tp', methods=['POST'])
-def create_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success', 'data': data}), 200
-
-
-@app.route('/api/delete_application_tp', methods=['POST'])
-def delete_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success'}), 200
-
-
-@app.route('/api/update_application_tp', methods=['POST'])
-def update_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success', 'data': data}), 200
-
-
-@app.route('/api/get_application_tp', methods=['POST'])
-def get_application_tp():
-    data = request.get_json()
-    if not data:
-        return jsonify({'error': 'Нет данных'}), 400
-    return jsonify({'status': 'success', 'data': data}), 200
-
-
-
-
 # Фоновая задача — проверка заявок со статусом False
 def check_pending_applications():
     with app.app_context():
