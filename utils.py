@@ -1,5 +1,5 @@
 import hashlib
-from BD_models import User
+from BD_models import User, Questionnaire, db
 import requests
 import base64
 from io import BytesIO
@@ -298,3 +298,7 @@ def check_task(task_id):
     except Exception as e:
         print(f"Произошла ошибка: {e}")
         return None
+
+
+### TP 1C
+
