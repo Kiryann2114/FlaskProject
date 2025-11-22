@@ -33,14 +33,12 @@ def index():
     else:
         return redirect(url_for("login"))
 
-
 @app.route('/login', methods=['GET','POST'])
 def login():
     if request.method == 'GET':
         return render_template('login.html')
     elif request.method == 'POST':
         return redirect("/")
-
 
 # API
 @app.route('/api/add_order', methods=['POST'])
@@ -59,7 +57,6 @@ def add_order():
             db.session.rollback()
             return "Произошла ошибка при добавлении ордера", 500
 
-
 @app.route('/api/get_orders')
 def get_orders():
     orders = Order.query.filter_by(passed=False).all()
@@ -67,7 +64,6 @@ def get_orders():
     for order in orders:
         struct.append({'id': order.id, 'json': eval(order.json_str)})
     return struct
-
 
 @app.route('/api/passed_order', methods=['POST'])
 def passed_order():
@@ -91,7 +87,7 @@ def anket():
     if not data:
         return jsonify({'error': 'Нет данных'}), 400
 
-    file_id, full_name, vacancy = send_file(data)
+    file_id, full_name, vacancy, filename, base64_content = send_file(data)
     task_id = create_task(file_id, full_name)
 
     # Сохранение в базу данных
@@ -109,8 +105,8 @@ def anket():
     send_message("chat14882", message)
 
     return jsonify({
-        'message': 'Анкета успешно получена',
-        'data': data  # можно убрать в продакшене
+        'filename': filename,
+        'base64_content': base64_content
     }), 200
 
 
@@ -127,7 +123,6 @@ def check_pending_applications():
                     send_message("chat14886", f"ФИО: {app_record.full_name} \n Должность: {app_record.vacancy} \n Комментарий СБ: {comment} \n\n Анкета: [URL=https://imperial44.bitrix24.ru/bitrix/tools/disk/focus.php?objectId={app_record.file_id}&cmd=show&action=showObjectInGrid&ncc=1]Ссылка[/URL]")
         except Exception as e:
             print(f"Ошибка при проверке заявок: {e}")
-
 
 ### Scheduler setup — замена threading + schedule
 def start_scheduler():

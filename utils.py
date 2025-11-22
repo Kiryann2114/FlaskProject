@@ -171,7 +171,7 @@ def send_file(form_data):
         # Проверяем статус ответа
         if response.status_code == 200:
             print("Файл создан")
-            return response.json()['result']['ID'], full_name, vacancy
+            return response.json()['result']['ID'], full_name, vacancy, filename, base64_content
         else:
             print(f"Ошибка: {response.status_code}")
             print(f"Текст ответа: {response.text}")
