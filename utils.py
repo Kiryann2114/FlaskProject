@@ -137,9 +137,10 @@ def save_to_docx(form_data):
 
     # Генерация имени файла
     full_name = form_data['personalInfo'].get("fullName", "соискателя").split()[0]
-    filename = f"Анкета_{full_name}_{datetime.now().strftime('%Y-%m-%d')}.docx"
-    full_name = form_data['personalInfo'].get("fullName", "Не указано")
     vacancy = form_data['personalInfo'].get("position", "Не указано")
+    filename = f"{datetime.now().strftime('%Y.%m.%d')}_{full_name}_{vacancy}.docx"
+    full_name = form_data['personalInfo'].get("fullName", "Не указано")
+
 
     return base64_content, filename, full_name, vacancy
 
